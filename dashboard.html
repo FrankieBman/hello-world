@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Insights Dashboard — Projects</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --panel: #131722;
+    --panel-2: #1a2030;
+    --border: #232a3d;
+    --text: #e6e8ef;
+    --muted: #8b93a7;
+    --accent: #7c9cff;
+    --accent-2: #5eead4;
+    --warn: #f5a524;
+    --bad: #f87171;
+    --good: #4ade80;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+  }
+  a { color: var(--accent); }
+  header {
+    padding: 32px 40px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  header .meta {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  main {
+    padding: 24px 40px 64px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stat .label {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .stat .value {
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  section.primary {
+    background: linear-gradient(180deg, #161d2c 0%, #131826 100%);
+    border-color: #2a3554;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .section-head .tag {
+    background: rgba(124, 156, 255, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(124, 156, 255, 0.25);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .section-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .project {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .project h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .project p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .project .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .pill.warn { color: var(--warn); border-color: rgba(245, 165, 36, 0.35); background: rgba(245, 165, 36, 0.08); }
+  .empty-banner {
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    background: rgba(245, 165, 36, 0.06);
+    color: var(--warn);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  ul.bullets {
+    margin: 0;
+    padding-left: 18px;
+  }
+  ul.bullets li {
+    margin-bottom: 6px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  ul.bullets li span.muted {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  details {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: var(--panel-2);
+  }
+  details > summary {
+    cursor: pointer;
+    font-weight: 500;
+  }
+  details[open] > summary { margin-bottom: 8px; }
+  code, pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12.5px;
+  }
+  pre {
+    background: #0e1320;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    color: #cdd6f4;
+  }
+  footer {
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    padding: 24px 40px 32px;
+  }
+  @media (max-width: 720px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    header, main, footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Insights Dashboard</h1>
+    <div class="meta">Project-first view of recent Claude Code activity</div>
+  </div>
+  <div class="meta" id="generated"></div>
+</header>
+
+<main>
+  <div class="stats" id="stats"></div>
+
+  <section class="primary" id="projects-section">
+    <div class="section-head">
+      <h2>Projects</h2>
+      <span class="tag">Primary view</span>
+    </div>
+    <div class="section-sub" id="projects-sub"></div>
+    <div id="empty-banner"></div>
+    <div class="projects" id="projects"></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>What's Working</h2></div>
+    <div class="section-sub" id="working-intro"></div>
+    <ul class="bullets" id="working-list"></ul>
+  </section>
+
+  <div class="two-col">
+    <section>
+      <div class="section-head"><h2>Friction</h2></div>
+      <div class="section-sub" id="friction-intro"></div>
+      <div id="friction-list"></div>
+    </section>
+    <section>
+      <div class="section-head"><h2>Suggestions</h2></div>
+      <div id="suggestions-list"></div>
+    </section>
+  </div>
+
+  <section>
+    <div class="section-head"><h2>On the Horizon</h2></div>
+    <div class="section-sub" id="horizon-intro"></div>
+    <div id="horizon-list"></div>
+  </section>
+</main>
+
+<footer>
+  Generated locally from /insights output. Project area is the primary lens; other sections provide context.
+</footer>
+
+<script>
+const data = {
+  generatedAt: "2026-05-20",
+  totals: { sessions: 1, analyzed: 0, messages: 0, hours: 0, commits: 0 },
+  projects: [
+    { name: "No Data Available", sessions: 0, description: "No Claude Code usage data was captured in the provided dataset. All session counts, message counts, and activity metrics are zero. There is no information available to analyze project areas or development activities." },
+    { name: "Unknown Project Work", sessions: 0, description: "Without session summaries, tool usage, or commit history, it is not possible to identify specific project areas. The data structure appears to be an empty template awaiting population." },
+    { name: "Undetermined Languages", sessions: 0, description: "No programming languages were recorded in the usage data. The languages field is empty, preventing identification of technical stacks or frameworks used." },
+    { name: "Missing Friction Points", sessions: 0, description: "No friction details or user instructions were captured. This prevents analysis of pain points, workflow challenges, or improvement opportunities in Claude Code usage." },
+    { name: "Empty Date Range", sessions: 0, description: "The date range fields are blank, indicating no time-bounded activity was logged. A populated dataset would be needed to perform meaningful project area analysis." }
+  ],
+  working: {
+    intro: "Based on the limited data available, here are some general observations about effective Claude Code usage patterns.",
+    items: [
+      { title: "Exploring Claude Code's Capabilities", desc: "Taking time to understand the tool before committing to a workflow." },
+      { title: "Building a Foundation", desc: "Right moment to establish CLAUDE.md, commands, and conventions." },
+      { title: "Investing in Tooling", desc: "Engagement with usage analytics is itself a positive signal." }
+    ]
+  },
+  friction: {
+    intro: "There is insufficient usage data to identify specific friction patterns yet.",
+    categories: [
+      { category: "Insufficient Data for Analysis", description: "Zero sessions analyzed means no behavioral patterns can be detected." },
+      { category: "Missing User Instructions", description: "No CLAUDE.md captured — Claude restarts from zero context each session." },
+      { category: "No Tracked Outcomes or Commits", description: "Zero commits across the date range; success signal is missing." }
+    ]
+  },
+  suggestions: [
+    { title: "Start a CLAUDE.md", detail: "Give Claude persistent context: build/test commands, code style, conventions." },
+    { title: "Track repeated prompts", detail: "Repeated tasks (commit msgs, test fixes) are candidates for /skills." },
+    { title: "Use Task Agents", detail: "Explore unfamiliar code with subagents to keep main context clean." }
+  ],
+  horizon: {
+    intro: "AI-assisted development is shifting from single-prompt help to autonomous multi-agent workflows.",
+    items: [
+      { title: "Parallel Agent Swarms", desc: "Multiple agents on git worktrees, each owning a workstream." },
+      { title: "Autonomous TDD Loops", desc: "Define failing tests; let Claude iterate until they pass." },
+      { title: "Self-Maintaining Codebases", desc: "Long-running agents that open PRs for stale deps, flaky tests, dead code." }
+    ]
+  }
+};
+
+document.getElementById("generated").textContent = "Generated " + data.generatedAt;
+
+const stats = [
+  { label: "Sessions", value: data.totals.sessions },
+  { label: "Messages", value: data.totals.messages },
+  { label: "Hours", value: data.totals.hours },
+  { label: "Commits", value: data.totals.commits }
+];
+document.getElementById("stats").innerHTML = stats.map(s => `
+  <div class="stat">
+    <div class="label">${s.label}</div>
+    <div class="value">${s.value}</div>
+  </div>
+`).join("");
+
+const totalProjectSessions = data.projects.reduce((sum, p) => sum + p.sessions, 0);
+document.getElementById("projects-sub").textContent =
+  totalProjectSessions === 0
+    ? `${data.projects.length} project areas detected, but none have recorded sessions yet.`
+    : `${data.projects.length} project areas across ${totalProjectSessions} sessions.`;
+
+if (totalProjectSessions === 0) {
+  document.getElementById("empty-banner").innerHTML =
+    `<strong>No session activity yet.</strong> Project areas below are placeholders. Run more sessions in this repo (or others) to populate this view with real project breakdowns.`;
+}
+
+document.getElementById("projects").innerHTML = data.projects.map(p => `
+  <div class="project">
+    <h3>${p.name}</h3>
+    <p>${p.description}</p>
+    <div class="footer">
+      <span class="pill ${p.sessions === 0 ? 'warn' : ''}">${p.sessions} session${p.sessions === 1 ? '' : 's'}</span>
+      <span>${p.sessions === 0 ? 'awaiting data' : 'tracked'}</span>
+    </div>
+  </div>
+`).join("");
+
+document.getElementById("working-intro").textContent = data.working.intro;
+document.getElementById("working-list").innerHTML = data.working.items.map(i => `
+  <li><strong>${i.title}.</strong> <span class="muted">${i.desc}</span></li>
+`).join("");
+
+document.getElementById("friction-intro").textContent = data.friction.intro;
+document.getElementById("friction-list").innerHTML = data.friction.categories.map(c => `
+  <details>
+    <summary>${c.category}</summary>
+    <div class="section-sub" style="margin: 0;">${c.description}</div>
+  </details>
+`).join("");
+
+document.getElementById("suggestions-list").innerHTML = data.suggestions.map(s => `
+  <details>
+    <summary>${s.title}</summary>
+    <div class="section-sub" style="margin: 0;">${s.detail}</div>
+  </details>
+`).join("");
+
+document.getElementById("horizon-intro").textContent = data.horizon.intro;
+document.getElementById("horizon-list").innerHTML = `
+  <ul class="bullets">
+    ${data.horizon.items.map(i => `<li><strong>${i.title}.</strong> <span class="muted">${i.desc}</span></li>`).join("")}
+  </ul>
+`;
+</script>
+</body>
+</html>
